@@ -22,7 +22,7 @@ class AdminPostController extends Controller
     public function store()
     {
         Post::create(array_merge($this->validatePost(), [
-            'user_id' => request()->auth()->id(),
+            'user_id' => request()->user()->id,
             'thumbnail' => request()->file('thumbnail')->store('thumbnails')
         ]));
 
@@ -44,7 +44,7 @@ class AdminPostController extends Controller
 
         $post->update($attributes);
 
-        return redirect('/')->with('success', 'Post Updated!');
+        return back()->with('success', 'Post Updated!');
     }
 
     public function destroy(Post $post)
@@ -60,12 +60,11 @@ class AdminPostController extends Controller
 
         return request()->validate([
             'title' => 'required',
-            'thumbnail' => $post->exists ? ['image'] : ['required' , 'image'],
+            'thumbnail' => $post->exists ? ['image'] : ['required', 'image'],
             'slug' => ['required', Rule::unique('posts', 'slug')->ignore($post)],
             'excerpt' => 'required',
             'body' => 'required',
-            'category_id' => ['required', Rule::exists('categories', 'id')],
-            'published_at' => 'required'
+            'category_id' => ['required', Rule::exists('categories', 'id')]
         ]);
     }
 }
